@@ -32,14 +32,14 @@ App 模块添加依赖：
 
 ```kotlin
 dependencies {
-    implementation("com.github.gegeName:float-msg:0.0.4")
+    implementation("com.github.gegeName:float-msg:0.0.2")
 }
 ```
 
 把 `<version>` 替换成 GitHub/JitPack 上发布的 tag，例如：
 
 ```kotlin
-implementation("com.github.gegeName:float-msg:0.0.4")
+implementation("com.github.gegeName:float-msg:0.0.2")
 ```
 
 ### 本地模块依赖
