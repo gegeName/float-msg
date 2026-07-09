@@ -42,16 +42,6 @@ dependencies {
 implementation("com.github.gegeName:float-msg:0.0.2")
 ```
 
-### 本地模块依赖
-
-如果是在当前工程内直接使用：
-
-```kotlin
-dependencies {
-    implementation(project(":float-msg"))
-}
-```
-
 ## 基础用法
 
 布局里准备一个用于承载浮屏消息的容器，通常用 `FrameLayout` 覆盖在页面最上层：
