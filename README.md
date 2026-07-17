@@ -165,6 +165,12 @@ queue.cancelCurrent(channel = "top")
 queue.clearQueue()
 ```
 
+一键清除所有 channel 的等待队列：
+
+```kotlin
+queue.clearAllQueues()
+```
+
 清除指定 channel 的等待队列：
 
 ```kotlin

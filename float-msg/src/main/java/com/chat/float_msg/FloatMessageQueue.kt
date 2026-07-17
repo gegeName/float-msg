@@ -84,6 +84,15 @@ class FloatMessageQueue<T>(
         runOnMain { clearQueueInternal(channel) }
     }
 
+    /**
+     * 一键清空所有 channel 的等待队列。
+     *
+     * 当前正在显示或正在执行动画的消息不会被取消,如需同时取消可再调用 [cancelCurrent]。
+     */
+    fun clearAllQueues() {
+        runOnMain { clearQueueInternal(channel = null) }
+    }
+
     fun release() {
         runOnMain { releaseInternal() }
     }
