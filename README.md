@@ -145,6 +145,39 @@ queue.release()
 
 如果创建队列时传入了 `lifecycle`，通常不需要手动调用。
 
+取消当前正在显示或正在执行动画的消息：
+
+```kotlin
+queue.cancelCurrent()
+```
+
+取消指定 channel 当前消息：
+
+```kotlin
+queue.cancelCurrent(channel = "top")
+```
+
+`cancelCurrent` 只跳过当前消息，不会释放队列；如果对应 channel 还有等待消息，会继续执行下一条。
+
+清除等待队列：
+
+```kotlin
+queue.clearQueue()
+```
+
+清除指定 channel 的等待队列：
+
+```kotlin
+queue.clearQueue(channel = "top")
+```
+
+`clearQueue` 不会取消当前正在显示的消息。如果需要同时取消当前消息和等待队列，可以组合调用：
+
+```kotlin
+queue.clearQueue()
+queue.cancelCurrent()
+```
+
 ## 内置动画
 
 ### SlideInLeftAnimator

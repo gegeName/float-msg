@@ -64,6 +64,26 @@ class FloatMessageQueue<T>(
         enqueue(item = item, highPriority = true, channel = channel)
     }
 
+    /**
+     * 取消当前正在显示或正在执行动画的消息。
+     *
+     * @param channel 传入 channel 时只取消该 channel 当前消息;不传则取消所有 channel 当前消息。
+     * 取消后不会释放队列,对应 channel 如果还有等待消息会继续执行下一条。
+     */
+    fun cancelCurrent(channel: String? = null) {
+        runOnMain { cancelCurrentInternal(channel) }
+    }
+
+    /**
+     * 清除等待队列。
+     *
+     * @param channel 传入 channel 时只清除该 channel 的等待消息;不传则清除所有 channel 的等待消息。
+     * 当前正在显示或正在执行动画的消息不会被取消,如需同时取消可再调用 [cancelCurrent]。
+     */
+    fun clearQueue(channel: String? = null) {
+        runOnMain { clearQueueInternal(channel) }
+    }
+
     fun release() {
         runOnMain { releaseInternal() }
     }
@@ -87,6 +107,7 @@ class FloatMessageQueue<T>(
         released = true
         channels.values.forEach { state ->
             state.queue.clear()
+            state.currentToken++
             state.currentView?.let { view ->
                 animator.cancel(view)
                 detachView(view)
@@ -94,6 +115,42 @@ class FloatMessageQueue<T>(
         }
         channels.clear()
         mainHandler.removeCallbacksAndMessages(null)
+    }
+
+    private fun cancelCurrentInternal(channel: String?) {
+        if (released) return
+        if (channel == null) {
+            channels.keys.toList().forEach { key ->
+                channels[key]?.let { state -> cancelCurrentInternal(key, state) }
+            }
+        } else {
+            channels[channel]?.let { state -> cancelCurrentInternal(channel, state) }
+        }
+    }
+
+    private fun cancelCurrentInternal(channel: String, state: ChannelState<T>) {
+        val view = state.currentView ?: return
+        state.currentToken++
+        animator.cancel(view)
+        detachView(view)
+        state.currentView = null
+
+        if (state.queue.isEmpty()) {
+            state.isShowing = false
+            channels.remove(channel)
+        } else {
+            state.isShowing = true
+            consumeNext(channel, state)
+        }
+    }
+
+    private fun clearQueueInternal(channel: String?) {
+        if (released) return
+        if (channel == null) {
+            channels.values.forEach { state -> state.queue.clear() }
+        } else {
+            channels[channel]?.queue?.clear()
+        }
     }
 
     private fun consumeNext(channel: String, state: ChannelState<T>) {
@@ -125,13 +182,20 @@ class FloatMessageQueue<T>(
             }
             if (!added) continue
             state.currentView = view
+            val currentToken = ++state.currentToken
             val started = try {
                 animator.animateIn(view) {
-                    if (released) return@animateIn
+                    if (released || state.currentToken != currentToken || state.currentView !== view) {
+                        return@animateIn
+                    }
                     mainHandler.postDelayed({
-                        if (released) return@postDelayed
+                        if (released || state.currentToken != currentToken || state.currentView !== view) {
+                            return@postDelayed
+                        }
                         animator.animateOut(view) {
-                            if (released) return@animateOut
+                            if (released || state.currentToken != currentToken || state.currentView !== view) {
+                                return@animateOut
+                            }
                             detachView(view)
                             if (state.currentView === view) {
                                 state.currentView = null
@@ -174,5 +238,6 @@ class FloatMessageQueue<T>(
         val queue = ArrayDeque<T>()
         var isShowing = false
         var currentView: View? = null
+        var currentToken = 0
     }
 }

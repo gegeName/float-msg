@@ -108,6 +108,20 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:text="两个 channel 同时显示" />
+
+            <Button
+                android:id="@+id/btnCancelCurrent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="cancelCurrent：取消当前显示" />
+
+            <Button
+                android:id="@+id/btnClearQueue"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="clearQueue：清空等待队列" />
         </LinearLayout>
     </ScrollView>
 

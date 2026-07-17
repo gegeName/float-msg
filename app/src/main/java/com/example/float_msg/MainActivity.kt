@@ -31,6 +31,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var leftCenterFadeQueue: FloatMessageQueue<DemoMessage>
     private lateinit var rightCenterFadeQueue: FloatMessageQueue<DemoMessage>
     private lateinit var channelQueue: FloatMessageQueue<DemoMessage>
+    private lateinit var controlQueue: FloatMessageQueue<DemoMessage>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,6 +84,11 @@ class MainActivity : AppCompatActivity() {
             container = floatContainer,
             animator = SlideInLeftToCenterFadeOutAnimator(durationOut = 1200L),
             holdDurationMs = 1200L
+        )
+        controlQueue = createQueue(
+            container = floatContainer,
+            animator = SlideInRightToCenterFadeOutAnimator(durationOut = 1200L),
+            holdDurationMs = 4000L
         )
     }
 
@@ -200,6 +206,41 @@ class MainActivity : AppCompatActivity() {
                 ),
                 channel = "bottom"
             )
+        }
+
+        findViewById<View>(R.id.btnCancelCurrent).setOnClickListener { button ->
+            controlQueue.enqueue(
+                DemoMessage(
+                    text = "cancelCurrent 示例\n这条会在 0.8 秒后被取消",
+                    lane = 1,
+                    backgroundColor = "#B45309"
+                )
+            )
+            controlQueue.enqueue(
+                DemoMessage(
+                    text = "取消当前后\n队列继续执行下一条",
+                    lane = 1,
+                    backgroundColor = "#2563EB"
+                )
+            )
+            button.postDelayed({
+                controlQueue.cancelCurrent()
+            }, 800L)
+        }
+
+        findViewById<View>(R.id.btnClearQueue).setOnClickListener { button ->
+            repeat(5) { index ->
+                controlQueue.enqueue(
+                    DemoMessage(
+                        text = "clearQueue 示例 ${index + 1}/5\n0.8 秒后清空等待队列",
+                        lane = 1,
+                        backgroundColor = "#7C2D12"
+                    )
+                )
+            }
+            button.postDelayed({
+                controlQueue.clearQueue()
+            }, 800L)
         }
     }
 
